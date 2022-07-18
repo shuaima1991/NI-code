@@ -1,11 +1,11 @@
 rm(list = ls())
-setwd("D:/Rcode/文章思路/细胞焦亡与抗肿瘤免疫/泛癌与riskscore新/干性与风险评分泛癌")
+setwd("")
 gene="riskScore"           
 geneRT=read.table("gene.txt",sep="\t",header=F)          
-files='输入文件33.txt'
+files='杈撳叆鏂囦欢33.txt'
 data=read.table(files, header=T,sep="\t",check.names=F,row.names = 1)
 
-##错误点就在Cancertype没有转化问因子，索引没有32癌症列表
+##閿欒鐐瑰氨鍦–ancertype娌℃湁杞寲闂洜瀛愶紝绱㈠紩娌℃湁32鐧岀棁鍒楄〃
 CancerType=levels(as.factor(data$CancerType))
 sameGenes=sameGenes=intersect(as.vector(geneRT[,1]),colnames(data))
 outTab=matrix(1,32,6)
