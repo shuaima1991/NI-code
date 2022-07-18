@@ -2,7 +2,7 @@
 library("glmnet")
 library("survival")
 
-setwd("D:/Rcode/文章思路/坏死性凋亡/单因素和多因素cox")                #设置工作目录
+setwd("")                #设置工作目录
 rt=read.table("输入文件2.txt",header=T,sep="\t",row.names=1)       #读取文件
 #rt$Survival_time=rt$Survival_time/365
 rt$Survival_time=rt$Survival_time+0.04
@@ -42,8 +42,3 @@ write.table(cbind(id=rownames(outTab),outTab),
     quote=F,
     row.names=F)
 
-###Video source: http://study.163.com/provider/1026136977/index.htm?share=2&shareId=1026136977
-######Video source: http://www.biowolf.cn/shop/
-######生信自学网: http://www.biowolf.cn/
-######合作邮箱：2749657388@qq.com
-######答疑微信: 18520221056
