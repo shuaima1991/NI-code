@@ -2,8 +2,8 @@
 library("glmnet")
 library("survival")
 
-setwd("D:/Rcode/ÎÄÕÂË¼Â·/»µËÀĞÔµòÍö/µ¥ÒòËØºÍ¶àÒòËØcox")                #ÉèÖÃ¹¤×÷Ä¿Â¼
-rt=read.table("ÊäÈëÎÄ¼ş2.txt",header=T,sep="\t",row.names=1)       #¶ÁÈ¡ÎÄ¼ş
+setwd("D:/Rcode/æ–‡ç« æ€è·¯/åæ­»æ€§å‡‹äº¡/å•å› ç´ å’Œå¤šå› ç´ cox")                #è®¾ç½®å·¥ä½œç›®å½•
+rt=read.table("è¾“å…¥æ–‡ä»¶2.txt",header=T,sep="\t",row.names=1)       #è¯»å–æ–‡ä»¶
 #rt$Survival_time=rt$Survival_time/365
 rt$Survival_time=rt$Survival_time+0.04
 rt$Survival_time=rt$Survival_time/365
@@ -44,6 +44,6 @@ write.table(cbind(id=rownames(outTab),outTab),
 
 ###Video source: http://study.163.com/provider/1026136977/index.htm?share=2&shareId=1026136977
 ######Video source: http://www.biowolf.cn/shop/
-######ÉúĞÅ×ÔÑ§Íø: http://www.biowolf.cn/
-######ºÏ×÷ÓÊÏä£º2749657388@qq.com
-######´ğÒÉÎ¢ĞÅ: 18520221056
+######ç”Ÿä¿¡è‡ªå­¦ç½‘: http://www.biowolf.cn/
+######åˆä½œé‚®ç®±ï¼š2749657388@qq.com
+######ç­”ç–‘å¾®ä¿¡: 18520221056
