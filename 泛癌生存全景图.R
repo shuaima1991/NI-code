@@ -1,0 +1,151 @@
+setwd("D:/Rcode/文章思路/坏死性凋亡/泛癌分析/泛癌生存2")
+
+options("repos"= c(CRAN="https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))
+options(BioC_mirror="http://mirrors.tuna.tsinghua.edu.cn/bioconductor/")
+
+
+library(data.table)
+library(survival)
+library(pheatmap)
+Sys.setenv(LANGUAGE = "en") #显示英文报错信息
+options(stringsAsFactors = FALSE) #禁止chr转成factor
+
+# 读取生存信息和样品分组
+pansurv <- read.csv("easy_input_surv.csv", check.names = F)
+pansurv=pansurv[!duplicated(pansurv$ID), ]
+write.csv(pansurv,"pansurv1.csv",sep = "")
+tumors <- unique(pansurv$type)
+# 读取表达矩阵
+panexpr <- read.csv("easy_input_expr.csv",  check.names = F)
+
+panexpr=panexpr[!duplicated(panexpr$ID), ]
+panexpr=as.data.frame(t(panexpr))
+write.csv(panexpr,"panexpr.csv",sep = "")
+
+
+
+# 读取生存信息和样品分组
+pansurv <- read.csv("easy_input_surv1.csv", row.names = 1, check.names = F)
+tumors <- unique(pansurv$type)
+# 读取表达矩阵
+panexpr <- read.csv("easy_input_expr1.csv", row.names = 1, check.names = F)
+# 读取目标基因及其分组，用于最后画热图
+gene_group <- read.table("easy_input_gene.txt",sep = "\t",row.names = NULL,check.names = F,stringsAsFactors = F,header = T)
+# 根据GeneCards，该基因替换同义名，否则在TCGA数据里查不到
+gene_group[which(gene_group$Symbol == "VIRMA"),"Symbol"] <- "KIAA1429" 
+
+
+# cox分析的数据初始化
+survland.coxhr <- matrix(NA,nrow = nrow(gene_group),ncol = length(tumors),dimnames = list(gene_group$Symbol,tumors)) # 初始化cox分析HR结果
+survland.coxp <- matrix(NA,nrow = nrow(gene_group),ncol = length(tumors),dimnames = list(gene_group$Symbol,tumors)) # 初始化cox分析p值结果
+survland.coxplot <- matrix(0,nrow = nrow(gene_group),ncol = length(tumors),dimnames = list(gene_group$Symbol,tumors)) # 初始化绘图数据
+
+# logrank分析的数据初始化
+survland.logrankhr <- matrix(NA,nrow = nrow(gene_group),ncol = length(tumors),dimnames = list(gene_group$Symbol,tumors)) # 初始化logrank分析hr值结果
+survland.logrankp <- matrix(NA,nrow = nrow(gene_group),ncol = length(tumors),dimnames = list(gene_group$Symbol,tumors)) # 初始化logrank分析p值结果
+survland.logrankplot <- matrix(0,nrow = nrow(gene_group),ncol = length(tumors),dimnames = list(gene_group$Symbol,tumors)) # 初始化绘图数据
+
+# 循环计算每一个癌症
+for(t in tumors) {
+  for (g in gene_group$Symbol) { # 循环计算每一个基因
+    sam <- rownames(pansurv[which(pansurv$type == t),]) #提取当前癌症的sample ID
+    expr <- as.numeric(panexpr[g,sam]) # 提取当前基因的表达量
+    
+    expr.surv <- data.frame(futime = pansurv[sam,"OS.time"], # 提取当前癌症的生存信息
+                            fustat = pansurv[sam,"OS"], # 提取当前癌症的生存信息
+                            expr = expr, # 基因表达量
+                            stringsAsFactors = F)
+    
+    ## 方法一：cox
+    cox <- coxph(Surv(futime,fustat) ~ expr, data = expr.surv) # cox分析
+    coxSummary <- summary(cox)
+    hr <- as.numeric(coxSummary$coefficients[,"exp(coef)"])[1] # 提出HR
+    pvalue <- as.numeric(coxSummary$coefficients[,"Pr(>|z|)"])[1] # 提出p值
+    survland.coxhr[g,t] <- hr
+    survland.coxp[g,t] <- pvalue
+    
+    # 为画图准备矩阵
+    if(pvalue < 0.05) { # 如果p值显著的话存储数据
+      survland.coxplot[g,t] <- ifelse(hr > 1, 1, -1) # HR>1为风险因素，记为“1”，HR<1为保护因素，记为-1，其余默认为0
+    }
+    
+    ## 方法二：logrank
+    # 用中值（median）为样本分组，如果想用最佳分组，可参考FigureYa35batch_bestSeparationV3_update
+    expr.surv$group = ifelse(expr > median(expr),"high","low")
+    expr.surv$group <- factor(expr.surv$group, levels = c("low", "high"))
+    
+    data.survdiff <- survdiff(Surv(futime,fustat) ~ group, data = expr.surv)
+    pvalue <- 1 - pchisq(data.survdiff$chisq, length(data.survdiff$n) - 1)
+    hr <- (data.survdiff$obs[2]/data.survdiff$exp[2])/(data.survdiff$obs[1]/data.survdiff$exp[1])
+    survland.logrankhr[g,t] <- hr
+    survland.logrankp[g,t] <- pvalue
+    
+    # 为画图准备矩阵
+    if(pvalue < 0.05) { # 如果p值显著的话存储数据
+      survland.logrankplot[g,t] <- ifelse(hr > 1, 1, -1) # HR>1为风险因素，记为“1”，HR<1为保护因素，记为-1，其余默认为0
+    }
+  }
+}
+
+## 保存到文件，便于DIY其他形式的图
+# 或者以更大范围的基因（例如全基因组）作为输入，然后用HR和pvalue筛选出genes associated with the overall survival of patients (worse/better survival) in at least one cancer type或你关心的几种癌症或所有癌症
+# cox
+write.table(survland.coxplot, file = "cox_genes associated with the OS.txt", sep = "\t", row.names = T, col.names = T, quote = F)
+write.table(survland.coxhr,file = "cox HR in survival landscape.txt",sep = "\t",row.names = T,col.names = NA,quote = F)
+write.table(survland.coxp,file = "cox pvalue in survival landscape.txt",sep = "\t",row.names = T,col.names = NA,quote = F)
+
+# logrank
+write.table(survland.logrankplot, file = "logrank_genes associated with the OS.txt", sep = "\t", row.names = T, col.names = T, quote = F)
+write.table(survland.logrankhr,file = "logrank HR in survival landscape.txt",sep = "\t",row.names = T,col.names = NA,quote = F)
+write.table(survland.logrankp,file = "logrank pvalue in survival landscape.txt",sep = "\t",row.names = T,col.names = NA,quote = F)
+
+
+# 自定义颜色
+red <- "#D02E20"
+blue <- "#4D76B7"
+green <- "#50B544"
+yellow <- "#F8C77A"
+cyan <- "#5AC8F9"
+
+annRow <- gene_group # 行基因注释
+rownames(annRow) <- annRow$Symbol
+annColors <- list("Function" = c("Readers" = green,
+                                 "Writers" = yellow,
+                                 "Eraser" = cyan))
+
+# cox
+pheatmap(survland.coxplot,
+         border_color = "grey50",
+         show_rownames = T, # 显示行名
+         show_colnames = T, # 显示列明
+         cluster_rows = F, # 行不聚类
+         cluster_cols = F, # 列不聚类
+         color = c(blue,"grey95",red),
+         annotation_row = annRow[,"Function",drop = F],
+         annotation_colors = annColors,
+         legend_breaks = c(-1,0,1), # 修改图例的显示位置
+         legend_labels = c("Protective","p>0.05","Risky"), # 修改图例标签
+         cellwidth = 10, # 单元格宽度
+         cellheight = 10, # 单元格高度
+         filename = "m6A survival landscape using cox.pdf", # 保存文件
+         width = 8, # 图片宽度
+         height = 6) # 图片高度
+
+# logrank
+pheatmap(survland.logrankplot,
+         border_color = "grey50",
+         show_rownames = T, # 显示行名
+         show_colnames = T, # 显示列明
+         cluster_rows = F, # 行不聚类
+         cluster_cols = F, # 列不聚类
+         color = c(blue,"grey95",red),
+         annotation_row = annRow[,"Function",drop = F],
+         annotation_colors = annColors,
+         legend_breaks = c(-1,0,1), # 修改图例的显示位置
+         legend_labels = c("Protective","p>0.05","Risky"), # 修改图例标签
+         cellwidth = 10, # 单元格宽度
+         cellheight = 10, # 单元格高度
+         filename = "m6A survival landscape using logrank.pdf", # 保存文件
+         width = 8, # 图片宽度
+         height = 6) # 图片高度
+write.csv(panexpr, "easy_input_expr.csv", quote = F)

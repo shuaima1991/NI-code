@@ -1,0 +1,26 @@
+setwd("D:/Rcode/文章思路/坏死性凋亡/泛癌分析/免疫评分与NI指数")                           #设置工作目录
+data=read.table("热图输入文件.txt",sep="\t",header=T,check.names=F)    #读取文件
+data$pstar <- ifelse(data$p.value < 0.05,
+                     ifelse(data$p.value < 0.01,"**","*"),
+                     "")
+data$pstar[1:20]
+
+#你可能想要改变横轴细胞的顺序，那就把细胞按照你想要的顺序写入levels = c()的括号里。
+#查看细胞名
+#unique(data$immune_cells)
+#data$immune_cells <- factor(data$immune_cells, 
+#                            levels = c("第一种细胞","第二种细胞",,,,))
+
+ggplot(data, aes(immune_cells, gene)) + 
+  geom_tile(aes(fill = cor), colour = "white",size=1)+
+  scale_fill_gradient2(low = "#2b8cbe",mid = "white",high = "#e41a1c")+
+  geom_text(aes(label=pstar),col ="black",size = 5)+
+  theme_minimal()+# 不要背景
+  theme(axis.title.x=element_blank(),#不要title
+        axis.ticks.x=element_blank(),#不要x轴
+        axis.title.y=element_blank(),#不要y轴
+        axis.text.x = element_text(angle = 45, hjust = 1),# 调整x轴文字
+        axis.text.y = element_text(size = 8))+#调整y轴文字
+  #调整legen
+  labs(fill =paste0(" * p < 0.05","\n\n","** p < 0.01","\n\n","Correlation"))
+#3 12
