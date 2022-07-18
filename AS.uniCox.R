@@ -1,10 +1,10 @@
 
-pFilter=0.05                                                      #¶¨Òåµ¥ÒòËØÏÔÖøĞÔ
+pFilter=0.05                                                      #å®šä¹‰å•å› ç´ æ˜¾è‘—æ€§
 
-setwd("D:/Rcode/ÎÄÕÂË¼Â·/Ï¸°û½¹ÍöÓë¿¹Ö×ÁöÃâÒß/DEGs Í»±ä£¬¼×»ù»¯²îÒì»ùÒò»ã×ÜËõ¼õ 2") #ÉèÖÃ¹¤×÷Ä¿Â¼
-library(survival)                                                 #ÒıÓÃ°ü
+setwd("") #è®¾ç½®å·¥ä½œç›®å½•
+library(survival)                                                 #å¼•ç”¨åŒ…
 library(UpSetR)
-rt=read.table("µ¥ÒòËØÊäÈëÎÄ¼şĞÂ3.txt",header=T,sep="\t",check.names=F,row.names=1)       #¶ÁÈ¡ÊäÈëÎÄ¼ş
+rt=read.table("å•å› ç´ è¾“å…¥æ–‡ä»¶æ–°3.txt",header=T,sep="\t",check.names=F,row.names=1)       #è¯»å–è¾“å…¥æ–‡ä»¶
 
 outTab=data.frame()
 for(i in colnames(rt[,3:ncol(rt)])){
@@ -20,14 +20,14 @@ for(i in colnames(rt[,3:ncol(rt)])){
                     pvalue=coxSummary$coefficients[,"Pr(>|z|)"])
               )
 }
-#Êä³öËùÓĞµ¥ÒòËØµÄ½á¹û
+#è¾“å‡ºæ‰€æœ‰å•å› ç´ çš„ç»“æœ
 outTab = outTab[is.na(outTab$pvalue)==FALSE,]
 outTab=outTab[order(as.numeric(as.vector(outTab$pvalue))),]
 write.table(outTab,file="uniCoxResult.txt",sep="\t",row.names=F,quote=F)
-#Êä³öµ¥ÒòËØÏÔÖøµÄ½á¹û
+#è¾“å‡ºå•å› ç´ æ˜¾è‘—çš„ç»“æœ
 sigTab=outTab[as.numeric(as.vector(outTab$pvalue))<pFilter,]
 write.table(sigTab,file="uniCoxResult.Sig.txt",sep="\t",row.names=F,quote=F)
-#Êä³öµ¥ÒòËØÏÔÖøASµÄPSIÖµ£¬ÓÃÓÚºóĞø½¨Ä£
+#è¾“å‡ºå•å› ç´ æ˜¾è‘—ASçš„PSIå€¼ï¼Œç”¨äºåç»­å»ºæ¨¡
 sigGenes=c("futime","fustat")
 sigGenes=c(sigGenes,as.vector(sigTab[,1]))
 uniSigExp=rt[,sigGenes]
@@ -35,7 +35,7 @@ uniSigExp=cbind(id=row.names(uniSigExp),uniSigExp)
 write.table(uniSigExp,file="uniSigExp.txt",sep="\t",row.names=F,quote=F)
 
 
-#»æÖÆupsetÍ¼
+#ç»˜åˆ¶upsetå›¾
 gene=sapply(strsplit(sigGenes,"\\|"),"[",1)
 asType=sapply(strsplit(sigGenes,"\\|"),"[",3)
 upsetList=list(AA=unique(gene[asType=="AA"]),
@@ -47,21 +47,16 @@ upsetList=list(AA=unique(gene[asType=="AA"]),
                RI=unique(gene[asType=="RI"]) )
 upsetData=fromList(upsetList)
 
-pdf(file="uniCoxUpset.pdf",onefile = FALSE,width=8,height=5)              #±£´æÍ¼Æ¬
+pdf(file="uniCoxUpset.pdf",onefile = FALSE,width=8,height=5)              #ä¿å­˜å›¾ç‰‡
 upset(upsetData,
-      nsets = 7,                                    #Õ¹Ê¾¿É±ä¼ôÇĞÀàĞÍ¸öÊı
-      order.by = "freq",                            #°´ÕÕÊıÄ¿ÅÅĞò
-      show.numbers = "yes",                         #Öù×´Í¼ÉÏ·½ÊÇ·ñÏÔÊ¾ÊıÖµ
-      number.angles = 20,                           #×ÖÌå½Ç¶È
-      point.size = 1.5,                             #µãµÄ´óĞ¡
-      matrix.color="red",                           #½»¼¯µãÑÕÉ«
-      line.size = 0.8,                              #ÏßÌõ´ÖÏß
+      nsets = 7,                                    #å±•ç¤ºå¯å˜å‰ªåˆ‡ç±»å‹ä¸ªæ•°
+      order.by = "freq",                            #æŒ‰ç…§æ•°ç›®æ’åº
+      show.numbers = "yes",                         #æŸ±çŠ¶å›¾ä¸Šæ–¹æ˜¯å¦æ˜¾ç¤ºæ•°å€¼
+      number.angles = 20,                           #å­—ä½“è§’åº¦
+      point.size = 1.5,                             #ç‚¹çš„å¤§å°
+      matrix.color="red",                           #äº¤é›†ç‚¹é¢œè‰²
+      line.size = 0.8,                              #çº¿æ¡ç²—çº¿
       mainbar.y.label = "Gene Intersections",
       sets.x.label = "Set Size")
 dev.off()
 
-######Video source: http://ke.biowolf.cn
-######ÉúĞÅ×ÔÑ§Íø: https://www.biowolf.cn/
-######Î¢ĞÅ¹«ÖÚºÅ£ºbiowolf_cn
-######ºÏ×÷ÓÊÏä£º2749657388@qq.com
-######´ğÒÉÎ¢ĞÅ: 18520221056
