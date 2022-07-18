@@ -1,29 +1,29 @@
 
-setwd("D:/Rcode/ÎÄÕÂË¼Â·/»µËÀĞÔµòÍö/·º°©·ÖÎö/NIÖ¸ÊıÓëMSI")             #ÉèÖÃ¹¤×÷Ä¿Â¼
+setwd("")             #è®¾ç½®å·¥ä½œç›®å½•
 
 library(fmsb) 
-#setwd("D:\\biowolf\\panCancer\\18.MSIradar")         #ÉèÖÃ¹¤×÷Ä¿Â¼
-data=read.table("fmsbInput.txt",header=T,sep="\t",row.names=1,check.names=F)   #¶ÁÈ¡ÊäÈëÎÄ¼ş
+#setwd("D:\\biowolf\\panCancer\\18.MSIradar")         #è®¾ç½®å·¥ä½œç›®å½•
+data=read.table("fmsbInput.txt",header=T,sep="\t",row.names=1,check.names=F)   #è¯»å–è¾“å…¥æ–‡ä»¶
 maxValue=ceiling(max(abs(data))*10)/10
 data=rbind(rep(maxValue,ncol(data)),rep(-maxValue,ncol(data)),data)
-#¶¨ÒåÑÕÉ«
+#å®šä¹‰é¢œè‰²
 colors="blue"
-#¶¨ÒåÏÔÖøĞÔ
+#å®šä¹‰æ˜¾è‘—æ€§
 corStat=read.table("corStat.txt",header=T,sep="\t",row.names=1,check.names=F)
 colnames(data)=paste0(colnames(data),corStat$sig)
 
-#Êä³ö½á¹û
+#è¾“å‡ºç»“æœ
 pdf(file="radar.pdf",height=7,width=7)
 radarchart( data, axistype=1 , 
-    pcol=colors,                 #ÉèÖÃÑÕÉ«
-    plwd=2 ,                     #ÏßÌõ´ÖÏß
-    plty=1,                      #ĞéÏß£¬ÊµÏß
-    cglcol="grey",               #±³¾°ÏßÌõÑÕÉ«
-    cglty=1,                     #±³¾°ÏßÌõĞéÏß£¬ÊµÏß 
-    caxislabels=seq(-maxValue,maxValue,maxValue/2),    #×ø±ê¿Ì¶È
-    cglwd=1.2,                   #±³¾°ÏßÌõ´ÖÏ¸
-    axislabcol="green",           #¿Ì¶ÈÑÕÉ«
-    vlcex=0.8                    #×ÖÌå´óĞ¡
+    pcol=colors,                
+    plwd=2 ,                     
+    plty=1,                     
+    cglcol="grey",             
+    cglty=1,                    
+    caxislabels=seq(-maxValue,maxValue,maxValue/2),   
+    cglwd=1.2,                   
+    axislabcol="green",          
+    vlcex=0.8                   
 )
 dev.off()
 
