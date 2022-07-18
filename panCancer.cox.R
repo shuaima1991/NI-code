@@ -2,12 +2,12 @@
 library(survival)
 library(forestplot)
 
-setwd("D:/Rcode/ÎÄÕÂË¼Â·/»µËÀĞÔµòÍö/·º°©·ÖÎö/·º°©cox")                       #ÉèÖÃ¹¤×÷Ä¿Â¼
-rt=read.table("lassoRisk33.txt",header=T,sep="\t",check.names=F,row.names=1)    #¶ÁÈ¡ÊäÈëÎÄ¼ş
+setwd("D:/Rcode/æ–‡ç« æ€è·¯/åæ­»æ€§å‡‹äº¡/æ³›ç™Œåˆ†æ/æ³›ç™Œcox")                       #è®¾ç½®å·¥ä½œç›®å½•
+rt=read.table("lassoRisk33.txt",header=T,sep="\t",check.names=F,row.names=1)    #è¯»å–è¾“å…¥æ–‡ä»¶
 rt$futime=rt$futime/365
 gene=colnames(rt)[3]
 
-#¶ÔÖ×ÁöÀàĞÍ½øĞĞÑ­»·
+#å¯¹è‚¿ç˜¤ç±»å‹è¿›è¡Œå¾ªç¯
 outTab=data.frame()
 for(i in levels(as.factor(rt[,"CancerType"]))){
 	rt1=rt[(rt[,"CancerType"]==i),]
@@ -21,12 +21,12 @@ for(i in levels(as.factor(rt[,"CancerType"]))){
 	                   HR.95H=coxSummary$conf.int[,"upper .95"],
 			           pvalue=coxP) )
 }
-write.table(outTab,file="cox.result.txt",sep="\t",row.names=F,quote=F)    #Êä³ö»ùÒòºÍpÖµ±í¸ñÎÄ¼ş
+write.table(outTab,file="cox.result.txt",sep="\t",row.names=F,quote=F)    #è¾“å‡ºåŸºå› å’Œpå€¼è¡¨æ ¼æ–‡ä»¶
 
 
-############»æÖÆÉ­ÁÖÍ¼º¯Êı############
+############ç»˜åˆ¶æ£®æ—å›¾å‡½æ•°############
 bioForest=function(coxFile=null,forestFile=null,forestCol=null){
-    #¶ÁÈ¡ÊäÈëÎÄ¼ş
+    #è¯»å–è¾“å…¥æ–‡ä»¶
 	rt=read.table(coxFile,header=T,sep="\t",row.names=1,check.names=F)
 	data=as.matrix(rt)
 	HR=data[,1:3]
@@ -35,11 +35,11 @@ bioForest=function(coxFile=null,forestFile=null,forestCol=null){
 	hrHigh=sprintf("%.3f",HR[,"HR.95H"])
 	pVal=data[,"pvalue"]
 	pVal=ifelse(pVal<0.001, "<0.001", sprintf("%.3f", pVal))
-	clrs <- fpColors(box=forestCol,line="darkblue", summary="royalblue")      #¶¨ÒåÑÕÉ«
+	clrs <- fpColors(box=forestCol,line="darkblue", summary="royalblue")      #å®šä¹‰é¢œè‰²
 	tabletext <- 
 	  list(c(NA, rownames(HR)),
 	       append("pvalue", pVal),
-	       append("Hazard ratio",paste0(hr,"(",hrLow,"-",hrHigh,")")) )   #¶¨ÒåÍ¼Æ¬ÎÄ×Ö
+	       append("Hazard ratio",paste0(hr,"(",hrLow,"-",hrHigh,")")) )   #å®šä¹‰å›¾ç‰‡æ–‡å­—
 	pdf(file=forestFile,width = 9,height = 6,onefile = FALSE)
 	forestplot(tabletext, 
 	           rbind(rep(NA, 3), HR),
@@ -53,7 +53,7 @@ bioForest=function(coxFile=null,forestFile=null,forestCol=null){
 	           )
 	dev.off()
 }
-############»æÖÆÉ­ÁÖÍ¼º¯Êı############
+############ç»˜åˆ¶æ£®æ—å›¾å‡½æ•°############
 
 bioForest(coxFile="cox.result.txt",forestFile="forest.pdf",forestCol="red")
 
