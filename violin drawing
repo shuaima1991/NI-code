@@ -1,4 +1,4 @@
-setwd("D:/Rcode/文章思路/坏死性凋亡/NI分组/分组与NI指数")
+setwd("")
 library(ggplot2)
 library(ggpubr)
 tmp <- read.table("输入文件.txt", row.names = NULL, check.names = F, header = T, stringsAsFactors = F)
