@@ -1,15 +1,15 @@
-setwd("D:/Rcode/ÎÄÕÂË¼Â·/»µËÀÐÔµòÍö/·º°©·ÖÎö/·º°©Éú´æ")
+setwd("")
 
 library(survival)
 library(survminer)
 
-#setwd("D:\\biowolf\\panCancer\\08.survival")                     #ÉèÖÃ¹¤×÷Ä¿Â¼
-rt=read.table("ÊäÈëÎÄ¼þ33.txt",header=T,sep="\t",check.names=F,row.names=1)       #¶ÁÈ¡ÊäÈëÎÄ¼þ
+#setwd("D:\\biowolf\\panCancer\\08.survival")                     #è®¾ç½®å·¥ä½œç›®å½•
+rt=read.table("è¾“å…¥æ–‡ä»¶33.txt",header=T,sep="\t",check.names=F,row.names=1)       #è¯»å–è¾“å…¥æ–‡ä»¶
 rt$futime=rt$futime/365
 gene=colnames(rt)[3]
-pFilter=0.05            #km·½·¨pvalue¹ýÂËÌõ¼þ
+pFilter=0.05            #kmæ–¹æ³•pvalueè¿‡æ»¤æ¡ä»¶
 
-#¶ÔÖ×ÁöÀàÐÍ½øÐÐÑ­»·
+#å¯¹è‚¿ç˜¤ç±»åž‹è¿›è¡Œå¾ªçŽ¯
 for(i in as.factor(rt[,"CancerType"])){
 	rt1=rt[(rt[,"CancerType"]==i),]
 	group=ifelse(rt1[,gene]>median(rt1[,gene]),"high","low")
@@ -22,7 +22,7 @@ for(i in as.factor(rt[,"CancerType"])){
 			pValue=paste0("p=",sprintf("%.03f",pValue))
 		}
 		fit <- survfit(Surv(futime, fustat) ~ group, data = rt1)
-		#»æÖÆÉú´æÇúÏß
+		#ç»˜åˆ¶ç”Ÿå­˜æ›²çº¿
 		surPlot=ggsurvplot(fit, 
 				    data=rt1,
 				    title=paste0("Cancer: ",i),
@@ -41,8 +41,8 @@ for(i in as.factor(rt[,"CancerType"])){
 				    risk.table.title="",
 				    risk.table.height=.25)
 		pdf(file=paste0("survival.",i,".pdf"),onefile = FALSE,
-				    width = 6,             #Í¼Æ¬µÄ¿í¶È
-				    height =5)             #Í¼Æ¬µÄ¸ß¶È
+				    width = 6,             #å›¾ç‰‡çš„å®½åº¦
+				    height =5)             #å›¾ç‰‡çš„é«˜åº¦
 		print(surPlot)
 		dev.off()
 	}
