@@ -1,22 +1,22 @@
 
 
-setwd("D:/Rcode/ÎÄÕÂË¼Â·/»µËÀĞÔµòÍö/·º°©·ÖÎö/NIÖ¸ÊıÓëMSI")             #ÉèÖÃ¹¤×÷Ä¿Â¼
+setwd("")             #è®¾ç½®å·¥ä½œç›®å½•
 
-#¶ÁÈ¡±í´ïÎÄ¼ş
-exp=read.table("ÊäÈëÎÄ¼ş33.txt", header=T,sep="\t",row.names=1,check.names=F)
-#¶ÁÈ¡MSIÎÄ¼ş
+#è¯»å–è¡¨è¾¾æ–‡ä»¶
+exp=read.table("è¾“å…¥æ–‡ä»¶33.txt", header=T,sep="\t",row.names=1,check.names=F)
+#è¯»å–MSIæ–‡ä»¶
 MSI=read.table("MSI.txt", header=T,sep="\t",row.names=1,check.names=F)
-#È¥³ıÕı³£ÑùÆ·
+#å»é™¤æ­£å¸¸æ ·å“
 group=sapply(strsplit(row.names(exp),"\\-"),"[",4)
 group=sapply(strsplit(group,""),"[",1)
 group=gsub("2","1",group)
 exp=exp[group==0,]
-#ÑùÆ·È¡½»¼¯
+#æ ·å“å–äº¤é›†
 sameSample=intersect(row.names(MSI),row.names(exp))
 MSI=MSI[sameSample,]
 exp=exp[sameSample,]
 
-#Ïà¹ØĞÔ¼ìÑé
+#ç›¸å…³æ€§æ£€éªŒ
 outTab=data.frame()
 fmsbTab=data.frame()
 for(i in levels(as.factor(exp[,"CancerType"]))){
