@@ -1,4 +1,4 @@
-setwd("D:/Rcode/文章思路/坏死性凋亡/泛癌分析/免疫评分与NI指数")                           #设置工作目录
+setwd("")                           #设置工作目录
 data=read.table("热图输入文件.txt",sep="\t",header=T,check.names=F)    #读取文件
 data$pstar <- ifelse(data$p.value < 0.05,
                      ifelse(data$p.value < 0.01,"**","*"),
