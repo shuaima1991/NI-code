@@ -1,4 +1,4 @@
-setwd("D:/Rcode/文章思路/坏死性凋亡/泛癌分析/泛癌生存2")
+setwd("")
 
 options("repos"= c(CRAN="https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))
 options(BioC_mirror="http://mirrors.tuna.tsinghua.edu.cn/bioconductor/")
