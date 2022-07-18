@@ -5,25 +5,25 @@ library(survival)
 library(survminer)
 library(forestplot)
 
-pFilter=0.05                                                      #km·½·¨pvalue¹ıÂËÌõ¼ş
-cliFile="Survival_SupplementalTable_S1_20171025_xena_sp"          #ÁÙ´²Êı¾İÎÄ¼şÃû³Æ
-setwd("D:/Rcode/ÎÄÕÂË¼Â·/»µËÀĞÔµòÍö/·º°©·ÖÎö/·º°©dFI")             #ÉèÖÃ¹¤×÷Ä¿Â¼
+pFilter=0.05                                                     
+cliFile="Survival_SupplementalTable_S1_20171025_xena_sp"         
+setwd("")          
 
-#¶ÁÈ¡»ùÒò±í´ïÎÄ¼ş
-rt=read.table("ÊäÈëÎÄ¼ş33.txt",header=T,sep="\t",check.names=F,row.names=1)
+#è¯»å–åŸºå› è¡¨è¾¾æ–‡ä»¶
+rt=read.table("è¾“å…¥æ–‡ä»¶33.txt",header=T,sep="\t",check.names=F,row.names=1)
 gene=colnames(rt)[1]
 
-#¶ÁÈ¡ÁÙ´²Êı¾İÎÄ¼ş
+#è¯»å–ä¸´åºŠæ•°æ®æ–‡ä»¶
 cli=read.table(cliFile,header=T,sep="\t",check.names=F,row.names=1)
 cli=cli[,c("DFI.time","DFI")]
 cli=na.omit(cli)
 colnames(cli)=c("futime","fustat")
 
-#¶ÔÖ×ÁöÀàĞÍ½øĞĞÑ­»·
+#å¯¹è‚¿ç˜¤ç±»å‹è¿›è¡Œå¾ªç¯
 outTab=data.frame()
 for(i in levels(as.factor(rt[,"CancerType"]))){
 	rt1=rt[(rt[,"CancerType"]==i),]
-	#½»¼¯»ùÒò
+	#äº¤é›†åŸºå› 
 	data=cbind(rt1,gene=rt1[,gene])
 	data=as.matrix(data[,c(gene,"gene")])
 	if(nchar(row.names(data)[1])!=nchar(row.names(cli)[1])){
@@ -46,7 +46,7 @@ for(i in levels(as.factor(rt[,"CancerType"]))){
 			pValue=paste0("p=",sprintf("%.03f",pValue))
 		}
 		fit <- survfit(Surv(futime, fustat) ~ group, data = rt1)
-		#»æÖÆÉú´æÇúÏß
+		#ç»˜åˆ¶ç”Ÿå­˜æ›²çº¿
 		surPlot=ggsurvplot(fit, 
 				    data=rt1,
 				    title=paste0("Cancer: ",i),
@@ -68,7 +68,7 @@ for(i in levels(as.factor(rt[,"CancerType"]))){
 		print(surPlot)
 		dev.off()
 	}
-	#cox·ÖÎö
+	#coxåˆ†æ
 	cox=coxph(Surv(futime, fustat) ~ gene, data = rt1)
 	coxSummary = summary(cox)
     coxP=coxSummary$coefficients[,"Pr(>|z|)"]
@@ -79,11 +79,11 @@ for(i in levels(as.factor(rt[,"CancerType"]))){
 	                   HR.95H=coxSummary$conf.int[,"upper .95"],
 			           pvalue=coxP) )
 }
-write.table(outTab,file="cox.result.txt",sep="\t",row.names=F,quote=F)    #Êä³öÖ×ÁöÀàĞÍºÍpÖµ±í¸ñÎÄ¼ş
+write.table(outTab,file="cox.result.txt",sep="\t",row.names=F,quote=F)    #è¾“å‡ºè‚¿ç˜¤ç±»å‹å’Œpå€¼è¡¨æ ¼æ–‡ä»¶
 
-############»æÖÆÉ­ÁÖÍ¼º¯Êı############
+############ç»˜åˆ¶æ£®æ—å›¾å‡½æ•°############
 bioForest=function(coxFile=null,forestFile=null,forestCol=null){
-    #¶ÁÈ¡ÊäÈëÎÄ¼ş
+    #è¯»å–è¾“å…¥æ–‡ä»¶
 	rt=read.table(coxFile,header=T,sep="\t",row.names=1,check.names=F)
 	data=as.matrix(rt)
 	HR=data[,1:3]
@@ -92,11 +92,11 @@ bioForest=function(coxFile=null,forestFile=null,forestCol=null){
 	hrHigh=sprintf("%.3f",HR[,"HR.95H"])
 	pVal=data[,"pvalue"]
 	pVal=ifelse(pVal<0.001, "<0.001", sprintf("%.3f", pVal))
-	clrs <- fpColors(box=forestCol,line="darkblue", summary="royalblue")      #¶¨ÒåÑÕÉ«
+	clrs <- fpColors(box=forestCol,line="darkblue", summary="royalblue")      #å®šä¹‰é¢œè‰²
 	tabletext <- 
 	  list(c(NA, rownames(HR)),
 	       append("pvalue", pVal),
-	       append("Hazard ratio",paste0(hr,"(",hrLow,"-",hrHigh,")")) )   #¶¨ÒåÍ¼Æ¬ÎÄ×Ö
+	       append("Hazard ratio",paste0(hr,"(",hrLow,"-",hrHigh,")")) )   #å®šä¹‰å›¾ç‰‡æ–‡å­—
 	pdf(file=forestFile,width = 9,height = 6,onefile = FALSE)
 	forestplot(tabletext, 
 	           rbind(rep(NA, 3), HR),
@@ -110,13 +110,7 @@ bioForest=function(coxFile=null,forestFile=null,forestCol=null){
 	           )
 	dev.off()
 }
-############»æÖÆÉ­ÁÖÍ¼º¯Êı############
+############ç»˜åˆ¶æ£®æ—å›¾å‡½æ•°############
 
 bioForest(coxFile="cox.result.txt",forestFile="forest.pdf",forestCol="red")
 
-
-######Video source: https://ke.biowolf.cn
-######ÉúĞÅ×ÔÑ§Íø: https://www.biowolf.cn/
-######Î¢ĞÅ¹«ÖÚºÅ£ºbiowolf_cn
-######ºÏ×÷ÓÊÏä£ºbiowolf@foxmail.com
-######´ğÒÉÎ¢ĞÅ: 18520221056
