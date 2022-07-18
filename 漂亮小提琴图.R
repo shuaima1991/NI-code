@@ -1,0 +1,35 @@
+setwd("D:/Rcode/文章思路/坏死性凋亡/NI分组/分组与NI指数")
+library(ggplot2)
+library(ggpubr)
+tmp <- read.table("输入文件.txt", row.names = NULL, check.names = F, header = T, stringsAsFactors = F)
+table(tmp$DNAmAge)
+p <- wilcox.test(tmp[which(tmp$DNAmAge == "cluster1"),"est.ic50"],tmp[which(tmp$DNAmAge == "cluster2"),"est.ic50"])$p.value
+# 设置颜色
+jco <- c("#2874C5","#EABF00")
+
+ggplot(data = tmp,aes(x = DNAmAge, y = est.ic50, fill = DNAmAge))+
+  scale_fill_manual(values = jco[2:1]) + 
+  geom_violin(alpha=0.4, position = position_dodge(width = .75),
+              size=0.8, color="black") + # 边框线黑色
+  geom_boxplot(notch = TRUE, outlier.size = -1, 
+               color="black", lwd=0.8, alpha = 0.7)+ # 背景色透明化
+  geom_point(shape = 21, size=2, 
+             position = position_jitterdodge(), 
+             color="black", alpha=1)+ # 边框线黑色
+  theme_classic() +
+  ylab(expression("Estimated IC"[50]~" for Paclitaxel")) +
+  xlab("")  +
+  annotate(geom="text", cex=6,
+           x=1.5, y=1, # 根据自己的数据调节p value的位置
+           label=paste0("P ", ifelse(p<0.001, "< 0.001", paste0("= ",round(p,3)))), # 添加P值
+           color="black") + 
+  theme(#panel.border = element_rect(colour = "black", fill=NA, size=0.2), # 原图有框
+    axis.ticks = element_line(size=0.2,color="black"),
+    axis.ticks.length = unit(0.2,"cm"),
+    legend.position = "none",
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10))
+
+# 保存图像
+ggsave("boxViolin.pdf", width = 4.5, height = 4)
+
