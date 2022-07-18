@@ -1,4 +1,4 @@
-setwd("D:/Rcode/文章思路/坏死性凋亡/泛癌分析/泛癌富集分析")
+setwd("")
 options("repos"= c(CRAN="https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))
 options(BioC_mirror="http://mirrors.tuna.tsinghua.edu.cn/bioconductor/")
 
@@ -9,12 +9,11 @@ library(data.table)
 library(ggpubr)
 library(GSVA)
 source("twoclasslimma.R")
-Sys.setenv(LANGUAGE = "en") #显示英文报错信息
-options(stringsAsFactors = FALSE) #禁止chr转成factor
-# 直接读取样本信息，这里是每个sample对应的肿瘤类型
+Sys.setenv(LANGUAGE = "en") 
+options(stringsAsFactors = FALSE)
+
 samAnno <- read.table("easy_input_sample_annotation.txt", sep = "\t",header = T, check.names = F)
 
-# 快速读取表达谱数据并做数据预处理
 expr <- fread("EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv",sep = "\t",stringsAsFactors = F,check.names = F,header = T)
 expr[1:3,1:3]
 expr <- as.data.frame(expr); rownames(expr) <- expr[,1]; expr <- expr[,-1]
@@ -26,45 +25,42 @@ expr[expr < 0] <- 0 # 对于这份泛癌数据，将略小于0的数值拉到0�
 colnames(expr) <- substr(colnames(expr),1,15) # 非TCGA数据可忽略这行
 gc()
 
-# 读取感兴趣的基因
 #genelist <- read.table("easy_input_genelist.txt", header = T)$GeneSymbol
-# 或者直接从原文获取感兴趣的基因集 (TTC35/EMC2) 
+
 genelist <- c("FADD","FAS","FASLG","MLKL","RIPK1","RIPK3","TLR3","TNF")
 
-# 利用GSVA计算感兴趣基因集的富集得分，作为FPI
+
 es <- gsva(expr = as.matrix(log2(expr + 1)),
            gset.idx.list = list("genelist" = genelist),
            method = "ssgsea",
            parallel.sz = 0) # 若采用LINUX或者MacOS可以设置为0，Windows请设置为1
 write.table(es, file = "output_ssgsea enrichment score of interested gene list in pancancer.txt",sep = "\t",row.names = T,col.names = NA,quote = F)
 
-# 如果用某一个基因的表达量分组，直接运行下面这行即可
-#es <- log2(expr[rownames(expr) == "TP53",] + 1) # 以TP53为例
-# 这里用上述基因集的富集得分分组
+
+#es <- log2(expr[rownames(expr) == "TP53",] + 1) 
+
 es <- read.table("output_ssgsea enrichment score of interested gene list in pancancer.txt", sep = "\t",row.names = 1,check.names = F,stringsAsFactors = F,header = T)
 
-# 加载富集分析背景geneset
 msigdb.hallmark <- read.gmt("h.all.v7.2.symbols.gmt") 
 
-# 30%阈值来定义高低组（原文所述）
 pct <- 0.3 
 
 gseaTab <- NULL
 
-# 接下来批量做这些肿瘤中FPI高低的差异分析及GSEA富集分析
+
 tumors <- c("BLCA","BRCA","CESC","CHOL","COAD",
             "ESCA","GBM","HNSC","KICH","KIRC",
             "KIRP","LIHC","LUAD","LUSC","PAAD",
-            "PRAD","READ","STAD","THCA","UCEC") #注意：这里包含正常和肿瘤样本
+            "PRAD","READ","STAD","THCA","UCEC") 
 for (i in tumors) {
   message("--",i,"...")
   sam <- samAnno[which(samAnno$`cancer type` == i),"simple_barcode"]
-  comsam <- intersect(colnames(es), sam) # 得到特定肿瘤类型中基因集的富集得分（或某一基因的表达量）
+  comsam <- intersect(colnames(es), sam) 
   
-  tumsam <- comsam[substr(comsam,14,14) == "0"] # 仅提取肿瘤样本
-  # tumsam <- comsam # 对于非TCGA数据，可将上面一行替换为这行
+  tumsam <- comsam[substr(comsam,14,14) == "0"] 
+  # tumsam <- comsam # 
   es_subset <- as.data.frame(t(es[,tumsam]))
-  es_subset <- es_subset[order(es_subset$genelist,decreasing = T),,drop = F] # 对富集得分（或基因表达量）排序
+  es_subset <- es_subset[order(es_subset$genelist,decreasing = T),,drop = F] 
   
   high.es <- rownames(es_subset[1:(nrow(es_subset) * pct),,drop = F]) # 取前30%为高组
   low.es <- rownames(es_subset[nrow(es_subset):(nrow(es_subset) - nrow(es_subset) * pct + 1),,drop = F]) # 取后30%为低组
